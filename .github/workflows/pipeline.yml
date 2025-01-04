@@ -1,0 +1,96 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'README.md'
+      - 'CODE_OF_CONDUCT.md'
+      - 'SECURITY.md'
+      - 'LICENCE.md'
+      - 'docs/**'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛠️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup .NET 9 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+          
+      - name: 📦 Restore Dependencies
+        run: |
+          dotnet restore src/
+          
+      - name: 🏗️ Build Project
+        run: | 
+          echo "${{ github.ref }}"
+          dotnet build src --no-restore
+
+  docker_image:
+    name: Build and Push Docker Image
+    needs: build
+    runs-on: self-hosted
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 🛠️ Check out source
+        uses: actions/checkout@v4
+
+      - name: 🔐 Log in to container registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: 🚀 Build and push Docker image for ARM64
+        run: |
+          docker build \
+            --platform linux/arm64 \
+            -f src/Dockerfile \
+            -t ghcr.io/igor-couto/dice-roll:latest \
+            --push \
+            .
+
+  deploy:
+    name: Deploy to Server
+    needs: docker_image
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔐 Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        shell: bash
+
+      - name: 🚀 Pull and run the Docker image on the server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "
+            cd /home/$SSH_USER/apps/dice-roll || mkdir -p /home/$SSH_USER/apps/dice-roll && cd /home/$SSH_USER/apps/dice-roll
+
+            echo 'Logging in to GHCR...'
+            echo '${{ secrets.GITHUB_TOKEN }}' | sudo docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+
+            echo 'Pulling latest image...'
+            sudo docker pull ghcr.io/igor-couto/dice-roll:latest
+
+            echo 'Stopping and removing any old container...'
+            sudo docker rm -f dice-roll || true
+
+            echo 'Running the container...'
+            sudo docker run -d \
+              --name dice-roll \
+              --restart=always \
+              -p 50040:50040 \
+              ghcr.io/igor-couto/dice-roll:latest
+          "
+        shell: bash
