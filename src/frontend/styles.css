@@ -1,0 +1,190 @@
+@font-face {
+    font-family: 'Rubik';
+    src: url('fonts/Rubik-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Rubik';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #5d95f2;
+    flex-direction: column;
+}
+
+.roll-button button {
+    font-family: 'Rubik';
+    position: relative;
+    top:80px;
+    font-size: 80px;
+    padding: 15px 50px;
+    color: #fff;
+    background-color: #f4d95e;
+    border: none;
+    font-size: 40px;
+    border-radius: 50px;
+    box-shadow: 1px 3px #50514fb0;
+    outline: none;
+    transition: .3s;
+}
+  
+button:hover, button:active {
+    outline: none;
+    background: #50514F;
+    cursor: pointer;
+    transform: translateY(-10px);
+    transition: .3s;
+}
+
+button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+    transition: background-color 0.3s, opacity 0.3s, color 0.3s;
+    transition: .3s;
+}
+  
+.game {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-grow: 1;
+}
+  
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+  
+.dice {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+}
+
+.dot {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin: -10px 5px 5px -10px;
+    border-radius: 20px;
+    background-color: #eb5f79;
+    box-shadow: inset 2px 2px #A4283F;
+}
+
+footer {
+    padding: 5px 0;
+    margin-top: 20px;
+    background-color: #ec5f79;
+    color: white;
+    text-align: center;
+    width: 100%;
+    position: relative;
+}
+
+.github-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+}
+
+.github-icon img {
+    width: 100%;
+    height: auto;
+}
+
+.github-icon:hover img {
+    transform: scale(1.1);
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+
+.side {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 5px;
+    width: 100px;
+    height: 100px;
+    border: 1px solid #e5e5e5;
+    text-align: center;
+    line-height: 2em;
+}
+  
+.side:nth-child(1) {
+    transform: translateZ(3.1em);
+}
+  
+.side:nth-child(6) {
+    transform: rotateY(90deg) translateZ(3.1em);
+}
+  
+.side:nth-child(3) {
+    transform: rotateY(-90deg) translateZ(3.1em);
+}
+  
+.side:nth-child(4) {
+    transform: rotateX(90deg) translateZ(3.1em);
+}
+  
+.side:nth-child(5) {
+    transform: rotateX(-90deg) translateZ(3.1em);
+}
+  
+.side:nth-child(2) {
+    transform: rotateY(-180deg) translateZ(3.1em);
+}
+
+.show-1 { transform: rotateX(720deg) rotateZ(-720deg); }
+.show-2 { transform: rotateX(450deg) rotateZ(-720deg); }
+.show-3 { transform: rotateY(-450deg) rotateZ(-1440deg); }
+.show-4 { transform: rotateY(810deg) rotateZ(720deg); }
+.show-5 { transform: rotateX(-810deg) rotateZ(-1080deg); }
+.show-6 { transform: rotateX(-900deg) rotateZ(1080deg); }
+  
+.two-1, .three-1, .four-1, .five-1, .six-1 {
+    top: 20%;
+    left: 20%;
+}
+  
+.four-3, .five-3, .six-4 {
+    top: 20%;
+    left: 80%;
+}
+  
+.one-1, .three-2, .five-5 {
+    top: 50%;
+    left: 50%;
+}
+  
+.four-2, .five-2, .six-3 {
+    top: 80%;
+    left: 20%;
+}
+  
+.two-2, .three-3, .four-4, .five-4, .six-6 {
+    top: 80%;
+    left: 80%;
+}
+  
+.six-2 {
+    top: 50%;
+    left: 20%;
+}
+  
+.six-5 {
+    top: 50%;
+    left: 80%;
+}
