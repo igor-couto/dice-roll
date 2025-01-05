@@ -3,7 +3,7 @@
 [![CI/CD Pipeline](https://github.com/igor-couto/dice-roll/actions/workflows/pipeline.yml/badge.svg)](https://github.com/igor-couto/dice-roll/actions/workflows/pipeline.yml)
 
 You can run it locally or visit this publised instance here:
--  [https://igorcouto.com/dice-roll](https://igorcouto.com/dice-roll)
+-  [https://igorcouto.com/projects/dice-roll](https://igorcouto.com/projects/dice-roll)
 
 ![Screenshot](https://github.com/igor-couto/dice-roll/blob/main/docs/screenshot.png)
 
