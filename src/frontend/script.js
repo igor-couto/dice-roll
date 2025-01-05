@@ -20,7 +20,7 @@ async function rollDice() {
     audio.play();
 
     try {
-        const response = await fetch('/roll');
+        const response = await fetch('roll');
         if (!response.ok)
             throw new Error('Network response was not ok');
         
