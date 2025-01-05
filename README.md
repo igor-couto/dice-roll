@@ -5,7 +5,7 @@
 You can run it locally or visit this publised instance here:
 -  [https://igorcouto.com/projects/dice-roll](https://igorcouto.com/projects/dice-roll)
 
-![Screenshot](https://github.com/igor-couto/dice-roll/blob/main/docs/screenshot.wepb)
+![Screenshot](https://github.com/igor-couto/dice-roll/blob/main/docs/screenshot.webp)
 
 ## Contributing
 
