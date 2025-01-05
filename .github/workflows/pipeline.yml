@@ -90,7 +90,7 @@ jobs:
             sudo docker run -d \
               --name dice-roll \
               --restart=always \
-              -p 50040:50040 \
+              -p 50050:50050 \
               ghcr.io/igor-couto/dice-roll:latest
           "
         shell: bash
