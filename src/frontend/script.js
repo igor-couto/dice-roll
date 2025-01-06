@@ -25,8 +25,7 @@ async function rollDice() {
             throw new Error('Network response was not ok');
         
         diceRollResult = await response.text();
-        console.log(diceRollResult);
-
+        
         for (let i = 1; i <= 6; i++) {
             diceElement.classList.remove('show-' + i);
         }
