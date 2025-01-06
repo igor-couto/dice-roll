@@ -11,14 +11,7 @@ Check out the live version of the project here: [https://igorcouto.com/projects/
 
 ![Dice Roll Screenshot](https://github.com/igor-couto/dice-roll/blob/main/docs/screenshot.webp)
 
-## Features
-
-- **Backend** powered by .NET 9 with a minimalist API endpoint for dice rolls.
-- **Frontend** crafted with HTML, CSS, and JavaScript, featuring an animated dice roll.
-- Utilizes `RandomNumberGenerator` for secure and unpredictable dice outcomes.
-- Deployment pipeline using GitHub Packages and Github Container Registry.
-- Deployed on my personal web server.
-
+This project pipeline uses a self-hosted runner (for ARM64 support), GitHub Packages with GitHub Container Registry, and deploys to my private server.
 
 ## Contributing
 
