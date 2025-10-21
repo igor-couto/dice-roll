@@ -71,6 +71,11 @@ button:disabled {
     height: 100px;
     transform-style: preserve-3d;
     transition: transform 1s;
+    will-change: transform;
+}
+
+.dice.rolling {
+    transition: transform 0.2s ease-out;
 }
 
 .dot {
@@ -147,12 +152,12 @@ footer {
     transform: rotateY(-180deg) translateZ(3.1em);
 }
 
-.show-1 { transform: rotateX(720deg) rotateZ(-720deg); }
-.show-2 { transform: rotateX(450deg) rotateZ(-720deg); }
-.show-3 { transform: rotateY(-450deg) rotateZ(-1440deg); }
-.show-4 { transform: rotateY(810deg) rotateZ(720deg); }
-.show-5 { transform: rotateX(-810deg) rotateZ(-1080deg); }
-.show-6 { transform: rotateX(-900deg) rotateZ(1080deg); }
+.show-1 { transform: rotateX(0deg) rotateY(0deg); }
+.show-2 { transform: rotateY(-180deg); }
+.show-3 { transform: rotateY(90deg); }
+.show-4 { transform: rotateX(-90deg); }
+.show-5 { transform: rotateX(90deg); }
+.show-6 { transform: rotateY(-90deg); }
   
 .two-1, .three-1, .four-1, .five-1, .six-1 {
     top: 20%;
