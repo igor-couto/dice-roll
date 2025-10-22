@@ -5,6 +5,17 @@ const buttonElementText = buttonElement.textContent;
 
 const MIN_SPIN_DURATION = 1000;
 const ROLL_TICK_INTERVAL = 150;
+const SPIN_TRANSITION = 'transform 0.24s linear';
+const SETTLE_TRANSITION = 'transform 0.9s cubic-bezier(0.23, 1, 0.32, 1)';
+
+const FACE_ROTATIONS = {
+    1: { x: 0, y: 0 },
+    2: { x: 0, y: 180 },
+    3: { x: 0, y: 90 },
+    4: { x: 270, y: 0 },
+    5: { x: 90, y: 0 },
+    6: { x: 0, y: 270 }
+};
 
 const getNow = () =>
     typeof performance !== 'undefined' && typeof performance.now === 'function'
@@ -15,14 +26,15 @@ const scheduleFrame = typeof window !== 'undefined' && typeof window.requestAnim
     ? window.requestAnimationFrame.bind(window)
     : (callback) => setTimeout(callback, 0);
 
-let currentFace = 1;
 let confirmedFace = 1;
 let rollingIntervalId = null;
 let finalizeTimeoutId = null;
 let spinStartTime = 0;
+let currentRotation = { ...FACE_ROTATIONS[1] };
 
 audio.volume = 0.5;
 buttonElement.onclick = rollDice;
+applyRotation(currentRotation);
 
 async function rollDice() {
     buttonElement.disabled = true;
@@ -67,7 +79,7 @@ async function rollDice() {
         clearFinalizeTimeout();
         clearRollingInterval();
         diceElement.classList.remove('rolling');
-        scheduleFrame(() => setDiceFace(confirmedFace));
+        stopRollingAnimation(confirmedFace);
         buttonElement.textContent = buttonElementText;
         buttonElement.disabled = false;
     }
@@ -75,19 +87,22 @@ async function rollDice() {
 
 function startRollingAnimation() {
     diceElement.classList.add('rolling');
-    setDiceFace(getRandomFaceExcluding(currentFace));
-
-    rollingIntervalId = setInterval(() => {
-        setDiceFace(getRandomFaceExcluding(currentFace));
-    }, ROLL_TICK_INTERVAL);
+    setTransition(SPIN_TRANSITION);
+    queueSpinTick();
+    rollingIntervalId = setInterval(queueSpinTick, ROLL_TICK_INTERVAL);
 }
 
 function finishRollingAnimation(resultFace) {
     clearRollingInterval();
     diceElement.classList.remove('rolling');
+    setTransition(SETTLE_TRANSITION);
+
+    const extraSpins = 1 + Math.floor(Math.random() * 2);
 
     scheduleFrame(() => {
-        setDiceFace(resultFace);
+        const targetRotation = computeTargetRotation(resultFace, extraSpins);
+        applyRotation(targetRotation);
+        currentRotation = targetRotation;
         confirmedFace = resultFace;
     });
 }
@@ -106,25 +121,57 @@ function clearFinalizeTimeout() {
     }
 }
 
-function getRandomFaceExcluding(exclude) {
-    const nextFace = Math.floor(Math.random() * 6) + 1;
-    if (nextFace === exclude) {
-        return (nextFace % 6) + 1;
-    }
-    return nextFace;
+function queueSpinTick() {
+    const axis = Math.random() < 0.5 ? 'x' : 'y';
+    const baseStep = 90;
+    const multiplier = Math.random() < 0.6 ? 1 : 2;
+    const increment = baseStep * multiplier;
+    const updatedRotation = { ...currentRotation, [axis]: currentRotation[axis] + increment };
+    applyRotation(updatedRotation);
+    currentRotation = updatedRotation;
 }
 
-function setDiceFace(face) {
+function stopRollingAnimation(faceToShow) {
+    setTransition(SETTLE_TRANSITION);
+    scheduleFrame(() => {
+        const targetRotation = computeTargetRotation(faceToShow, 0);
+        applyRotation(targetRotation);
+        currentRotation = targetRotation;
+    });
+}
+
+function computeTargetRotation(face, extraSpins) {
     const normalizedFace = Number(face);
     if (!Number.isInteger(normalizedFace) || normalizedFace < 1 || normalizedFace > 6) {
-        return;
+        return currentRotation;
     }
 
-    for (let i = 1; i <= 6; i++) {
-        diceElement.classList.remove('show-' + i);
-    }
+    const base = FACE_ROTATIONS[normalizedFace];
+    const spins = Math.max(0, extraSpins);
 
-    void diceElement.offsetWidth;
-    diceElement.classList.add('show-' + normalizedFace);
-    currentFace = normalizedFace;
+    const minX = currentRotation.x + spins * 360;
+    const minY = currentRotation.y + spins * 360;
+
+    const target = {
+        x: projectRotation(base.x, minX),
+        y: projectRotation(base.y, minY)
+    };
+
+    return target;
+}
+
+function projectRotation(baseAngle, minimum) {
+    let angle = baseAngle;
+    while (angle < minimum) {
+        angle += 360;
+    }
+    return angle;
+}
+
+function applyRotation({ x, y }) {
+    diceElement.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+}
+
+function setTransition(value) {
+    diceElement.style.transition = value;
 }
