@@ -3,10 +3,11 @@ const diceElement = document.getElementById('dice');
 const buttonElement = document.querySelector("#roll-button > button");
 const buttonElementText = buttonElement.textContent;
 
-const MIN_SPIN_DURATION = 1000;
-const ROLL_TICK_INTERVAL = 150;
-const SPIN_TRANSITION = 'transform 0.24s linear';
-const SETTLE_TRANSITION = 'transform 0.9s cubic-bezier(0.23, 1, 0.32, 1)';
+const MIN_SPIN_DURATION = 10;
+const MIN_SPIN_DELAY = 700; // Lower values make the die start swapping faces faster; higher values make the initial spin slower
+const MAX_SPIN_DELAY = 280; // Raising it lets the spin slow down more before settling; lowering it keeps the spin brisk all the way through.
+const SPIN_DELAY_STEP = 35; // Larger steps decelerate the spin sooner; smaller steps give a more gradual slowdown.
+const SETTLE_TRANSITION = 'transform 1.9s cubic-bezier(0.23, 1, 0.32, 1)';
 
 const FACE_ROTATIONS = {
     1: { x: 0, y: 0 },
@@ -27,9 +28,10 @@ const scheduleFrame = typeof window !== 'undefined' && typeof window.requestAnim
     : (callback) => setTimeout(callback, 0);
 
 let confirmedFace = 1;
-let rollingIntervalId = null;
+let rollingTimeoutId = null;
 let finalizeTimeoutId = null;
 let spinStartTime = 0;
+let spinDelay = MIN_SPIN_DELAY;
 let currentRotation = { ...FACE_ROTATIONS[1] };
 
 audio.volume = 0.5;
@@ -49,7 +51,7 @@ async function rollDice() {
     audio.play();
 
     clearFinalizeTimeout();
-    clearRollingInterval();
+    clearRollingTimer();
     diceElement.classList.remove('rolling');
 
     spinStartTime = getNow();
@@ -77,7 +79,7 @@ async function rollDice() {
     } catch (error) {
         console.error('Error fetching dice roll result:', error);
         clearFinalizeTimeout();
-        clearRollingInterval();
+        clearRollingTimer();
         diceElement.classList.remove('rolling');
         stopRollingAnimation(confirmedFace);
         buttonElement.textContent = buttonElementText;
@@ -87,13 +89,15 @@ async function rollDice() {
 
 function startRollingAnimation() {
     diceElement.classList.add('rolling');
-    setTransition(SPIN_TRANSITION);
+    clearRollingTimer();
+    spinDelay = MIN_SPIN_DELAY;
+    setTransition(getSpinTransition(spinDelay));
     queueSpinTick();
-    rollingIntervalId = setInterval(queueSpinTick, ROLL_TICK_INTERVAL);
+    scheduleNextSpinTick();
 }
 
 function finishRollingAnimation(resultFace) {
-    clearRollingInterval();
+    clearRollingTimer();
     diceElement.classList.remove('rolling');
     setTransition(SETTLE_TRANSITION);
 
@@ -107,10 +111,19 @@ function finishRollingAnimation(resultFace) {
     });
 }
 
-function clearRollingInterval() {
-    if (rollingIntervalId !== null) {
-        clearInterval(rollingIntervalId);
-        rollingIntervalId = null;
+function scheduleNextSpinTick() {
+    rollingTimeoutId = setTimeout(() => {
+        queueSpinTick();
+        spinDelay = Math.min(spinDelay + SPIN_DELAY_STEP, MAX_SPIN_DELAY);
+        setTransition(getSpinTransition(spinDelay));
+        scheduleNextSpinTick();
+    }, spinDelay);
+}
+
+function clearRollingTimer() {
+    if (rollingTimeoutId !== null) {
+        clearTimeout(rollingTimeoutId);
+        rollingTimeoutId = null;
     }
 }
 
@@ -132,6 +145,7 @@ function queueSpinTick() {
 }
 
 function stopRollingAnimation(faceToShow) {
+    clearRollingTimer();
     setTransition(SETTLE_TRANSITION);
     scheduleFrame(() => {
         const targetRotation = computeTargetRotation(faceToShow, 0);
@@ -166,6 +180,11 @@ function projectRotation(baseAngle, minimum) {
         angle += 360;
     }
     return angle;
+}
+
+function getSpinTransition(delayMs) {
+    const clamped = Math.max(delayMs, 60);
+    return `transform ${clamped / 1000}s linear`;
 }
 
 function applyRotation({ x, y }) {
